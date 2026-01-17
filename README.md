@@ -43,7 +43,6 @@ SafeGuard is a **MERN stack women safety web application** designed to provide q
 **▶️ Demo Video:**  
 
 
-https://github.com/user-attachments/assets/5bde6480-7d44-4b96-84d9-0bc8c31ae94d
 
 
 

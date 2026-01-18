@@ -21,7 +21,7 @@ SafeGuard is a **MERN stack women safety web application** designed to provide q
 - React
 - TypeScript
 - Vite
-- CSS / Tailwind (if used)
+- CSS / Tailwind
 
 **Backend**
 - Node.js

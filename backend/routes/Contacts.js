@@ -18,7 +18,13 @@ router.post("/", async (req, res) => {
 // 📌 Get all contacts for a user
 router.get("/:userId", async (req, res) => {
   try {
-    const contacts = await Contact.find({ userId: req.params.userId });
+    const contacts = await Contact.find({
+      $or: [
+        { userId: req.params.userId }, // normal case
+        { userId: { $exists: false } } // 🔥 old contacts without userId
+      ]
+    });
+
     res.json(contacts);
   } catch (err) {
     res.status(500).json({ error: err.message });

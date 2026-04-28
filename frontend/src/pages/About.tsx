@@ -55,7 +55,7 @@ function About() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Story</h2>
             <div className="space-y-4 text-gray-600">
               <p>
-                SafeGuard was founded in 2025 by a team of passionate developers, safety experts, and advocates 
+                SafeGuard was founded in 2026 by a team of passionate developers, safety experts, and advocates 
                 who recognized the urgent need for comprehensive women's safety solutions in our digital age.
               </p>
               <p>
@@ -127,33 +127,26 @@ function About() {
         {/* Team Section */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-col md:flex-row justify-evenly items-center gap-8">
             <div className="text-center">
               <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">PG</span>
+                <span className="text-white text-2xl font-bold">UG</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Prachi Golia</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">Aastha Jain</h3>
               <p className="text-purple-600 text-sm mb-2">Software Developer</p>
               <p className="text-gray-600 text-sm">Practicing As A MERN Developer.</p>
             </div>
 
             <div className="text-center">
               <div className="w-24 h-24 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">RS</span>
+                <span className="text-white text-2xl font-bold">UG</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Ronnie Sharma</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">Aayushi Patidar</h3>
               <p className="text-blue-600 text-sm mb-2">App Builder</p>
               <p className="text-gray-600 text-sm">App builder and Data analyst for response system.</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">AG</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Archi Golia</h3>
-              <p className="text-green-600 text-sm mb-2">Head of Safety Department</p>
-              <p className="text-gray-600 text-sm">Psychologist and researcher focused on trauma-informed safety solutions.</p>
-            </div>
+            
           </div>
         </div>
 

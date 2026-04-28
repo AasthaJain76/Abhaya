@@ -8,6 +8,8 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+// import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { AppProvider } from "./AppContext"; 
 
 function App() {
@@ -23,6 +25,14 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
+          <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
           <Route path="*" element={<NotFound />} />
         </Routes>
 

@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== "production") {
   console.log("✅ Loaded .env file");
   console.log("TWILIO SID:", process.env.TWILIO_SID);
   console.log("TWILIO AUTH:", process.env.TWILIO_AUTH);
-  console.log("TWILIO PHONE:", process.env.TWILIO_PHONE);
+  // console.log("TWILIO PHONE:", process.env.TWILIO_PHONE);
   console.log("MONGO URI:", process.env.MONGO_URI);
 }
 
@@ -42,7 +42,7 @@ app.use("/api/sos", sosRoutes);
 app.use("/api/auth", authRoutes);
 
 // 6️⃣ Start server after DB connect
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5174;
 
 mongoose
   .connect(process.env.MONGO_URI, {

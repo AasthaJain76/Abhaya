@@ -40,7 +40,7 @@ type AppContextType = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 // Backend API URL
-const API_URL = "http://localhost:5000/api/contacts";
+const API_URL = "http://localhost:5174/api/contacts";
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isSOSActive, setIsSOSActive] = useState(false);

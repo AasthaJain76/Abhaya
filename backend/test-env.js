@@ -3,4 +3,4 @@ dotenv.config({ path: 'C:/Users/Dell/OneDrive/Documents/project/SafeWomenApp/bac
 
 console.log(process.env.TWILIO_SID);
 console.log(process.env.TWILIO_AUTH);
-console.log(process.env.TWILIO_PHONE);
+// console.log(process.env.TWILIO_PHONE);

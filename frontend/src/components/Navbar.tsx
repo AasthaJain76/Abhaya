@@ -5,13 +5,17 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  const token = localStorage.getItem("token");
+
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'SOS', path: '/sos' },
     { name: 'Tracking', path: '/tracking' },
     { name: 'Resources', path: '/resources' },
     { name: 'About Us', path: '/about' },
-    { name: 'Login', path: '/login' }, // ✅ Added Login
+
+    // Show Login only if user is NOT logged in
+    ...(!token ? [{ name: 'Login', path: '/login' }] : []),
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -38,13 +42,12 @@ function Navbar() {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.path)
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.path)
                     ? 'text-purple-600 bg-purple-50'
                     : item.name === 'Login'
-                    ? 'text-white bg-purple-600 hover:bg-purple-700'
-                    : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
-                }`}
+                      ? 'text-white bg-purple-600 hover:bg-purple-700'
+                      : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
+                  }`}
               >
                 {item.name}
               </Link>
@@ -93,13 +96,12 @@ function Navbar() {
                 key={item.name}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive(item.path)
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(item.path)
                     ? 'text-purple-600 bg-purple-50'
                     : item.name === 'Login'
-                    ? 'text-white bg-purple-600 hover:bg-purple-700'
-                    : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
-                }`}
+                      ? 'text-white bg-purple-600 hover:bg-purple-700'
+                      : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
+                  }`}
               >
                 {item.name}
               </Link>

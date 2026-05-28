@@ -15,44 +15,33 @@ function SOS() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isCancelled, setIsCancelled] = useState(false);
 
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [editingContact, setEditingContact] =
+    useState<Contact | null>(null);
+
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const userId = localStorage.getItem("userId");
 
   // ============================
-  // ✅ FETCH CONTACTS
+  // FETCH CONTACTS
   // ============================
   useEffect(() => {
-    console.log("🔍 Fetching contacts...");
-    console.log("User ID:", userId);
-
-    if (!userId) {
-      console.warn("❌ No userId found");
-      return;
-    }
+    if (!userId) return;
 
     const fetchContacts = async () => {
       try {
-        const res = await fetch(`http://localhost:5174/api/contacts/${userId}`);
-        console.log("API STATUS:", res.status);
+        const res = await fetch(
+          `http://localhost:5174/api/contacts/${userId}`
+        );
 
-        const text = await res.text();
-        console.log("RAW RESPONSE:", text);
-
-        const data = text ? JSON.parse(text) : [];
-        console.log("PARSED DATA:", data);
-
-        if (!res.ok) {
-          console.error("❌ API error:", data);
-          return;
-        }
+        const data = await res.json();
 
         setContacts(Array.isArray(data) ? data : data.contacts || []);
       } catch (err) {
-        console.error("❌ Error fetching contacts:", err);
+        console.error("Error fetching contacts:", err);
       }
     };
 
@@ -60,32 +49,28 @@ function SOS() {
   }, [userId]);
 
   // ============================
-  // 📍 LOCATION
+  // GET LOCATION
   // ============================
   useEffect(() => {
-    console.log("📍 Getting location...");
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const coords = {
+          setLocation({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
-          };
-          console.log("✅ Location:", coords);
-          setLocation(coords);
+          });
         },
-        (err) => console.error("❌ Location error:", err.message)
+        (err) => {
+          console.error("Location error:", err.message);
+        }
       );
     }
   }, [setLocation]);
 
   // ============================
-  // 🚨 SEND SOS
+  // SEND WHATSAPP SOS
   // ============================
-  const sendSOSAlert = async () => {
-    console.log("🚨 Sending SOS...");
-
+  const sendSOSAlert = () => {
     if (isCancelled) return;
 
     if (!location) {
@@ -93,36 +78,56 @@ function SOS() {
       return;
     }
 
+    if (!contacts.length) {
+      alert("No emergency contacts found");
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:5174/api/sos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ userId, location }),
-      });
+      let phone = contacts[0].phone;
 
-      const data = await res.json();
-      console.log("SOS RESPONSE:", data);
+      // Remove spaces, +, -, etc.
+      phone = phone.replace(/\D/g, "");
 
-      if (res.ok) {
-        alert("✅ SOS alert sent!");
-        setIsSOSActive(true);
-      } else {
-        alert("❌ Failed: " + (data.message || "Unknown error"));
+      // Add India country code if missing
+      if (phone.length === 10) {
+        phone = "91" + phone;
       }
+
+      // Validate
+      if (phone.length < 12) {
+        alert("Invalid phone number");
+        return;
+      }
+
+      console.log("FINAL PHONE:", phone);
+
+      const mapsLink = `https://maps.google.com/?q=${location.lat},${location.lng}`;
+
+      const message =
+        `[EMERGENCY ALERT]\n\n` +
+        `I need immediate help.\n\n` +
+        `My Live Location:\n${mapsLink}`;
+
+      const whatsappURL =
+        `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+      console.log("WHATSAPP URL:", whatsappURL);
+
+      window.open(whatsappURL, "_blank");
+
+      setIsSOSActive(true);
+
     } catch (err) {
-      console.error("❌ SOS error:", err);
+      console.error("WhatsApp error:", err);
+      alert("Failed to open WhatsApp");
     }
   };
 
   // ============================
-  // ⏱ START
+  // START COUNTDOWN
   // ============================
   const handleSOSActivation = () => {
-    console.log("⏱ Starting countdown");
-
     setIsActivated(true);
     setCountdown(10);
     setIsCancelled(false);
@@ -132,22 +137,22 @@ function SOS() {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
 
-          console.log("🚀 Sending SOS now");
+          if (!isCancelled) {
+            sendSOSAlert();
+          }
 
-          if (!isCancelled) sendSOSAlert();
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
   };
 
   // ============================
-  // ❌ CANCEL
+  // CANCEL SOS
   // ============================
   const handleCancel = () => {
-    console.log("❌ Cancelled");
-
     setIsActivated(false);
     setCountdown(0);
     setIsCancelled(true);
@@ -159,7 +164,7 @@ function SOS() {
   };
 
   // ============================
-  // ✏️ EDIT
+  // EDIT CONTACT
   // ============================
   const handleEdit = (contact: Contact) => {
     setEditingContact(contact);
@@ -167,78 +172,153 @@ function SOS() {
     setNewPhone(contact.phone);
   };
 
+  // ============================
+  // SAVE CONTACT
+  // ============================
   const handleSave = async () => {
     if (!editingContact) return;
+
+    let cleanedPhone = newPhone.replace(/\D/g, "");
+
+    // Allow only 10 digit Indian numbers
+    if (cleanedPhone.length !== 10) {
+      alert("Enter valid 10-digit mobile number");
+      return;
+    }
 
     try {
       const res = await fetch(
         `http://localhost:5174/api/contacts/${editingContact._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: newName, phone: newPhone }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: newName,
+            phone: cleanedPhone,
+          }),
         }
       );
 
       if (res.ok) {
-        console.log("✅ Updated");
-
         setContacts((prev) =>
           prev.map((c) =>
             c._id === editingContact._id
-              ? { ...c, name: newName, phone: newPhone }
+              ? {
+                  ...c,
+                  name: newName,
+                  phone: cleanedPhone,
+                }
               : c
           )
         );
 
         setEditingContact(null);
+
+        alert("Contact updated successfully");
       }
     } catch (err) {
-      console.error("❌ Update error:", err);
+      console.error("Update error:", err);
     }
   };
 
-  const handleCancelEdit = () => setEditingContact(null);
+  // ============================
+  // CANCEL EDIT
+  // ============================
+  const handleCancelEdit = () => {
+    setEditingContact(null);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-100 py-8">
       <div className="max-w-4xl mx-auto px-4">
 
         {/* HEADER */}
-        <h1 className="text-3xl font-bold text-center mb-6">
+        <h1 className="text-4xl font-bold text-center mb-6 text-red-600">
           Emergency SOS
         </h1>
 
-        {/* DEBUG */}
-        <p className="text-center text-sm text-gray-500">
+        {/* CONTACT COUNT */}
+        <p className="text-center text-gray-500 mb-6">
           Contacts Loaded: {contacts.length}
         </p>
 
-        {/* BUTTON */}
-        <div className="bg-white p-8 text-center rounded-xl shadow mb-8">
+        {/* SOS SECTION */}
+        <div className="bg-white p-10 rounded-2xl shadow-xl text-center mb-8">
+
           {!isActivated ? (
             <button
               onClick={handleSOSActivation}
-              className="w-40 h-40 bg-red-600 text-white rounded-full"
+              className="
+                w-48 h-48
+                bg-red-600
+                hover:bg-red-700
+                text-white
+                rounded-full
+                text-4xl
+                font-bold
+                shadow-2xl
+                transition-all duration-300
+              "
             >
               SOS
             </button>
+
           ) : countdown > 0 ? (
             <>
-              <h2 className="text-4xl">{countdown}</h2>
-              <button onClick={handleCancel}>Cancel</button>
+              <h2 className="text-6xl font-bold text-red-600 mb-6">
+                {countdown}
+              </h2>
+
+              <button
+                onClick={handleCancel}
+                className="
+                  px-6 py-3
+                  bg-gray-700
+                  hover:bg-gray-800
+                  text-white
+                  rounded-lg
+                "
+              >
+                Cancel
+              </button>
             </>
           ) : (
-            <p className="text-green-600">Activated</p>
+            <p className="text-green-600 text-2xl font-bold">
+              SOS Activated
+            </p>
           )}
         </div>
 
         {/* LOCATION */}
-        <div className="bg-white p-6 rounded-xl shadow mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow mb-8">
+          <h2 className="text-2xl font-bold mb-4">
+            Live Location
+          </h2>
+
           {location ? (
             <>
-              <p>Lat: {location.lat}</p>
-              <p>Lng: {location.lng}</p>
+              <p className="mb-2">
+                Latitude: {location.lat}
+              </p>
+
+              <p className="mb-4">
+                Longitude: {location.lng}
+              </p>
+
+              <a
+                href={`https://maps.google.com/?q=${location.lat},${location.lng}`}
+                target="_blank"
+                rel="noreferrer"
+                className="
+                  text-blue-600
+                  underline
+                  font-semibold
+                "
+              >
+                Open in Google Maps
+              </a>
             </>
           ) : (
             <p>Fetching location...</p>
@@ -246,24 +326,95 @@ function SOS() {
         </div>
 
         {/* CONTACTS */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-bold mb-4">Contacts</h2>
+        <div className="bg-white p-6 rounded-2xl shadow">
+          <h2 className="text-2xl font-bold mb-6">
+            Emergency Contacts
+          </h2>
 
           {contacts.length ? (
             contacts.map((c) => (
-              <div key={c._id} className="border p-3 mb-2">
+              <div
+                key={c._id}
+                className="border p-4 rounded-xl mb-4"
+              >
                 {editingContact?._id === c._id ? (
                   <>
-                    <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-                    <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
-                    <button onClick={handleSave}>Save</button>
-                    <button onClick={handleCancelEdit}>Cancel</button>
+                    <input
+                      value={newName}
+                      onChange={(e) =>
+                        setNewName(e.target.value)
+                      }
+                      placeholder="Name"
+                      className="
+                        border
+                        p-2
+                        mr-2
+                        rounded
+                      "
+                    />
+
+                    <input
+                      value={newPhone}
+                      onChange={(e) =>
+                        setNewPhone(e.target.value)
+                      }
+                      placeholder="Phone Number"
+                      className="
+                        border
+                        p-2
+                        mr-2
+                        rounded
+                      "
+                    />
+
+                    <button
+                      onClick={handleSave}
+                      className="
+                        bg-green-600
+                        text-white
+                        px-4 py-2
+                        mr-2
+                        rounded
+                      "
+                    >
+                      Save
+                    </button>
+
+                    <button
+                      onClick={handleCancelEdit}
+                      className="
+                        bg-gray-600
+                        text-white
+                        px-4 py-2
+                        rounded
+                      "
+                    >
+                      Cancel
+                    </button>
                   </>
                 ) : (
                   <>
-                    <p>{c.name}</p>
-                    <p>{c.phone}</p>
-                    <button onClick={() => handleEdit(c)}>Edit</button>
+                    <p className="font-bold text-lg">
+                      {c.name}
+                    </p>
+
+                    <p className="text-gray-700">
+                      {c.phone}
+                    </p>
+
+                    <button
+                      onClick={() => handleEdit(c)}
+                      className="
+                        mt-3
+                        bg-blue-600
+                        hover:bg-blue-700
+                        text-white
+                        px-4 py-2
+                        rounded
+                      "
+                    >
+                      Edit
+                    </button>
                   </>
                 )}
               </div>

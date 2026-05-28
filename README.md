@@ -1,6 +1,6 @@
-# 🛡️ SafeGuard – Women Safety Web Application
+# 🛡️ Abhaya – Women Safety Web Application
 
-SafeGuard is a **MERN stack women safety web application** designed to provide quick emergency assistance, real-time location sharing, and enhanced personal safety using modern web technologies.
+Abhaya is a **MERN stack women safety web application** designed to provide quick emergency assistance, real-time location sharing, and enhanced personal safety using modern web technologies.
 
 ---
 
